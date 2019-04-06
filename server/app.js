@@ -35,3 +35,27 @@ let users = [
     password: "thering"
   }
 ];
+
+app.post("/api/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+
+    if (!user) {
+      return res.status(400).send([user, "Cannot log in", info]);
+    }
+
+    req.login(user, err => {
+      res.send("Logged in");
+    });
+  })(req, res, next);
+});
+
+app.get("/api/logout", function(req, res) {
+  req.logout();
+
+  console.log("Logged out");
+
+  return res.send();
+});
