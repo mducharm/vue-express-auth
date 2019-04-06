@@ -37,6 +37,7 @@ let users = [
 ];
 
 app.post("/api/login", (req, res, next) => {
+  console.log("post received");
   passport.authenticate("local", (err, user, info) => {
     if (err) {
       return next(err);
