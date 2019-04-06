@@ -59,3 +59,56 @@ app.get("/api/logout", function(req, res) {
 
   return res.send();
 });
+
+const authMiddleware = (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    res.status(401).send("Not Authenticated");
+  } else {
+    return next();
+  }
+};
+
+app.get("/api/user", authMiddleware, (req, res) => {
+  let user = users.find(user => {
+    return user.id === req.session.passport.user;
+  });
+
+  console.log([user, req.session]);
+
+  res.send({ user: user });
+});
+
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password"
+    },
+    (username, password, done) => {
+      let user = users.find(user => {
+        return user.email === username && user.password === password;
+      });
+
+      if (user) {
+        done(null, user);
+      } else {
+        done(null, false, { message: "Incorrect username or password" });
+      }
+    }
+  )
+);
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+  let user = users.find(user => {
+    return user.id === id;
+  });
+  done(null, user);
+});
+
+app.listen(3000, () => {
+  console.log("Listening on 3000");
+});
